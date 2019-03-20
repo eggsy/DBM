@@ -1,2 +1,1 @@
-# DBM
-I will publish my DBM mods, commands and etc.
+This is the repo where I will publish all of my _new_ DBM mods, commands and stuff. You can download, edit and use them safely. If you will only translate the actions I've made, just don't delete my name, remember you just translated it, not made it!
