@@ -67,7 +67,7 @@ module.exports = {
     //---------------------------------------------------------------------
 
     //fields: ["DateOfBirth", "format", "storage", "varName"],
-    fields: ["executeThis", "debugMode", "storage", "varName"],
+    fields: ["executeThis", "storage", "varName", "storage2", "errorVarName"],
 
     //---------------------------------------------------------------------
     // Command HTML
@@ -95,28 +95,33 @@ module.exports = {
 	</div><br>
 <div style="width: 90%;">
 	Execute:<br>
-	<textarea id="executeThis" rows="9" placeholder="You can only run bash commands like 'node -v'..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
-</div><br>
+	<textarea id="executeThis" rows="9" placeholder="You can only run bash/CMD commands like 'node -v'..." style="width: 99%; font-family: monospace; white-space: nowrap; resize: none;"></textarea>
+</div>
 <div style="padding-top: 8px;">
 	<div style="float: left; width: 35%;">
-		Store In:<br>
+		Store Result In:<br>
 		<select id="storage" class="round">
 			${data.variables[1]}
 		</select>
 	</div>
-	<div id="varNameContainer" style="float: right; width: 60%;">
+	<div id="varNameContainer" style="float: left; padding-left: 12px; width: 60%;">
 		Variable Name:<br>
 		<input id="varName" class="round" type="text">
     </div>
 </div><br><br>
-<div>
-	<label for="debugMode"><font color="white">Debug Mode</font></label>		
-	<select id="debugMode" class="round">
-		<option value="1" selected>Enabled</option>
-		<option value="0" >Disabled</option>
-	</select>	   
-	<text style="font-size: 60%;">This will print errors to your console when it's enabled.</text>
+<div style="padding-top: 8px;">
+	<div style="float: left; width: 35%;">
+		Store Error In:<br>
+		<select id="storage2" class="round">
+			${data.variables[1]}
+		</select>
+	</div>
+	<div id="errorNameContainer" style="float: left; padding-left: 12px; width: 60%;">
+		Variable Name:<br>
+		<input id="errorVarName" class="round" type="text">
+    </div>
 </div>
+<span style="font-size: 12px">Errors will only be stored when there's an error (results will be undefined).</span>
 	`
     },
 
@@ -132,6 +137,7 @@ module.exports = {
         const { glob, document } = this;
 
         glob.variableChange(document.getElementById('storage'), 'varNameContainer');
+        glob.variableChange(document.getElementById('storage2'), 'varNameContainer');
     },
 
     //---------------------------------------------------------------------
@@ -146,25 +152,27 @@ module.exports = {
         const data = cache.actions[cache.index],
             exec = require('child_process').exec,
             command = this.evalMessage(data.executeThis, cache),
-            debugMode = parseInt(data.debugMode);
+            storage = parseInt(data.storage),
+            varName = this.evalMessage(data.varName, cache),
+            storage2 = parseInt(data.storage2),
+            varName2 = this.evalMessage(data.errorVarName, cache);
 
         try { // Doing this will reduce the chance of getting your bot crashed.
             exec(command, (error, stdout) => {
-                if (error && debugMode == "1") {
-                    console.log("Execution error:", error);
+                if (error) {
+                    this.storeValue(error, storage2, varName2, cache);
+                    this.callNextAction(cache);
                 } else {
                     if (stdout) {
-                        const storage = parseInt(data.storage),
-                            varName = this.evalMessage(data.varName, cache);
-
                         this.storeValue(stdout, storage, varName, cache);
                     }
                     this.callNextAction(cache);
                 }
             });
         } catch (error) {
-            if (error && debugMode == "1") { // And yeah, even when doing that, it'll check if debug mode is enabled.
-                console.log("Execution error:", error);
+            if (error) {
+                this.storeValue(error, storage2, varName2, cache);
+                this.callNextAction(cache);
             }
         }
     },
