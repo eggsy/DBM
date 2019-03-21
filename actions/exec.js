@@ -52,10 +52,7 @@ module.exports = {
     //---------------------------------------------------------------------
 
     variableStorage: function (data, varType) {
-        const type = parseInt(data.storage);
-        if (type !== varType) return;
-        let dataType = 'Execution Result';
-        return ([data.varName, dataType]);
+        return 'Execution Result';
     },
 
     //---------------------------------------------------------------------
@@ -66,7 +63,6 @@ module.exports = {
     // are also the names of the fields stored in the action's JSON data.
     //---------------------------------------------------------------------
 
-    //fields: ["DateOfBirth", "format", "storage", "varName"],
     fields: ["executeThis", "storage", "varName", "storage2", "errorVarName"],
 
     //---------------------------------------------------------------------
