@@ -16,7 +16,6 @@ module.exports = {
 
     section: "Other Stuff",
 
-
     //---------------------------------------------------------------------
     // DBM Mods Manager Variables (Optional but nice to have!)
     //
