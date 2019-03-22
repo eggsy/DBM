@@ -51,7 +51,11 @@ module.exports = {
     //---------------------------------------------------------------------
 
     variableStorage: function (data, varType) {
-        return 'Execution Result';
+        const type = parseInt(data.storage);
+        if (type !== varType) return;
+        else if (type2 !== varType) return;
+        let dataType = 'Execution Result';
+        return ([data.varName, dataType]);
     },
 
     //---------------------------------------------------------------------
@@ -62,7 +66,7 @@ module.exports = {
     // are also the names of the fields stored in the action's JSON data.
     //---------------------------------------------------------------------
 
-    fields: ["executeThis", "storage", "varName", "storage2", "errorVarName"],
+    fields: ["executeThis", "storage", "varName"],
 
     //---------------------------------------------------------------------
     // Command HTML
@@ -103,20 +107,7 @@ module.exports = {
 		Variable Name:<br>
 		<input id="varName" class="round" type="text">
     </div>
-</div><br><br>
-<div style="padding-top: 8px;">
-	<div style="float: left; width: 35%;">
-		Store Error In:<br>
-		<select id="storage2" class="round">
-			${data.variables[1]}
-		</select>
-	</div>
-	<div id="errorNameContainer" style="float: left; padding-left: 12px; width: 60%;">
-		Variable Name:<br>
-		<input id="errorVarName" class="round" type="text">
-    </div>
-</div>
-<span style="font-size: 12px">Errors will only be stored when there's an error (results will be undefined).</span>
+</div><span style="font-size: 12px">Errors will be stored into the variable when there's an error.</span>
 	`
     },
 
@@ -132,7 +123,6 @@ module.exports = {
         const { glob, document } = this;
 
         glob.variableChange(document.getElementById('storage'), 'varNameContainer');
-        glob.variableChange(document.getElementById('storage2'), 'varNameContainer');
     },
 
     //---------------------------------------------------------------------
@@ -148,14 +138,12 @@ module.exports = {
             exec = require('child_process').exec,
             command = this.evalMessage(data.executeThis, cache),
             storage = parseInt(data.storage),
-            varName = this.evalMessage(data.varName, cache),
-            storage2 = parseInt(data.storage2),
-            varName2 = this.evalMessage(data.errorVarName, cache);
+            varName = this.evalMessage(data.varName, cache);
 
         try { // Doing this will reduce the chance of getting your bot crashed.
             exec(command, (error, stdout) => {
                 if (error) {
-                    this.storeValue(error, storage2, varName2, cache);
+                    this.storeValue(error, storage, varName, cache);
                     this.callNextAction(cache);
                 } else {
                     if (stdout) {
@@ -166,7 +154,7 @@ module.exports = {
             });
         } catch (error) {
             if (error) {
-                this.storeValue(error, storage2, varName2, cache);
+                this.storeValue(error, storage, varName, cache);
                 this.callNextAction(cache);
             }
         }
