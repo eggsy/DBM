@@ -140,24 +140,17 @@ module.exports = {
             storage = parseInt(data.storage),
             varName = this.evalMessage(data.varName, cache);
 
-        try { // Doing this will reduce the chance of getting your bot crashed.
-            exec(command, (error, stdout) => {
-                if (error) {
-                    this.storeValue(error, storage, varName, cache);
-                    this.callNextAction(cache);
-                } else {
-                    if (stdout) {
-                        this.storeValue(stdout, storage, varName, cache);
-                    }
-                    this.callNextAction(cache);
-                }
-            });
-        } catch (error) {
+        exec(command, (error, stdout) => {
             if (error) {
                 this.storeValue(error, storage, varName, cache);
                 this.callNextAction(cache);
+            } else {
+                if (stdout) {
+                    this.storeValue(stdout, storage, varName, cache);
+                }
+                this.callNextAction(cache);
             }
-        }
+        });
     },
 
     //---------------------------------------------------------------------
